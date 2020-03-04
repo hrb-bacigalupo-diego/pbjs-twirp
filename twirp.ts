@@ -55,7 +55,7 @@ export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any)
 
         })
         .catch((err: AxiosError) => {
-            callback(getTwirpError(err), null);
+            callback(err, null);
         });
     };
 };

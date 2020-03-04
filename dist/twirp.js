@@ -4,7 +4,8 @@ var getTwirpError = function (err) {
     var resp = err.response;
     var twirpError = {
         code: 'unknown',
-        msg: 'unknown error'
+        msg: 'unknown error',
+        meta: {}
     };
     if (resp) {
         var headers = resp.headers;
@@ -12,7 +13,7 @@ var getTwirpError = function (err) {
         if (headers['content-type'] === 'application/json') {
             var s = data.toString();
             if (s === "[object ArrayBuffer]") {
-                s = String.fromCharCode.apply(null, new Uint8Array(data));
+                s = new TextDecoder("utf-8").decode(new Uint8Array(data));
             }
             try {
                 twirpError = JSON.parse(s);
@@ -41,7 +42,7 @@ exports.createTwirpAdapter = function (axios, methodLookup) {
             callback(null, new Uint8Array(resp.data));
         })
             .catch(function (err) {
-            callback(new Error(getTwirpError(err).msg), null);
+            callback(err, null);
         });
     };
 };
