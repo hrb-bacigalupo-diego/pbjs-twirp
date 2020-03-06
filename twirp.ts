@@ -1,26 +1,20 @@
 import {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
 import {Message, Method, rpc, RPCImpl, RPCImplCallback} from 'protobufjs';
 
-class TwirpError implements Error {
-    public name = 'TwirpError';
-
-    constructor(public code:string,public message: string,public meta:{[key:string]:string}) {
-        if (typeof console !== 'undefined') {
-            console.log(`name: ${this.name}, message: ${this.message}, code:${this.code}`)
-        }
-    }
-    toString() {
-        return `${this.name} ${this.message} ${this.code} ${this.meta}`;
-    }
+interface TwirpError {
+    name:string;
+    code: string;
+    message: string;
+    meta?:{[key:string]:string};
 }
 
-const getTwirpError = (err: AxiosError): { message: string; code: string; meta: {},name:string} => {
+const getTwirpError = (err: AxiosError): TwirpError => {
     const resp = err.response;
     let twirpError = {
+        name:'TwirpError',
         code: 'unknown',
         message: 'unknown error',
-        meta: {},
-        name:''
+        meta: {detail:''}
     };
 
     if (resp) {
@@ -34,8 +28,11 @@ const getTwirpError = (err: AxiosError): { message: string; code: string; meta: 
                 s = new TextDecoder("utf-8").decode(new Uint8Array(data));
             }
 
-            twirpError = JSON.parse(s);
-            throw new TwirpError(twirpError.code,twirpError.message,twirpError.meta)
+            try {
+                twirpError = JSON.parse(s);
+            } catch (e) {
+                twirpError.message = `JSON.parse() error: ${e.toString()}`
+            }
         }
     }
 
@@ -55,12 +52,12 @@ export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any)
             data: requestData.slice(),
             responseType: 'arraybuffer'
         })
-        .then((resp: AxiosResponse<Uint8Array|ArrayBuffer>) => {
-            callback(null, new Uint8Array(resp.data));
+            .then((resp: AxiosResponse<Uint8Array|ArrayBuffer>) => {
+                callback(null, new Uint8Array(resp.data));
 
-        })
-        .catch((err: AxiosError) => {
-            callback(getTwirpError(err), null);
-        });
+            })
+            .catch((err: AxiosError) => {
+                callback(getTwirpError(err), null);
+            });
     };
 };
