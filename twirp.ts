@@ -6,7 +6,7 @@ class TwirpError implements Error {
 
     constructor(public code:string,public message: string,public meta:{[key:string]:string}) {
         if (typeof console !== 'undefined') {
-            console.log(`name: ${this.name}, message: ${this.message}`)
+            console.log(`name: ${this.name}, message: ${this.message}, code:${this.code}`)
         }
     }
     toString() {

@@ -7,7 +7,7 @@ var TwirpError = /** @class */ (function () {
         this.meta = meta;
         this.name = 'TwirpError';
         if (typeof console !== 'undefined') {
-            console.log("name: " + this.name + ", message: " + this.message);
+            console.log("name: " + this.name + ", message: " + this.message + ", code:" + this.code);
         }
     }
     TwirpError.prototype.toString = function () {
