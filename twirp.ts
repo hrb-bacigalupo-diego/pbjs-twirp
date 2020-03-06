@@ -1,18 +1,26 @@
 import {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
 import {Message, Method, rpc, RPCImpl, RPCImplCallback} from 'protobufjs';
 
-interface TwirpError {
-    code: string;
-    msg: string;
-    meta?:{[key:string]:string};
+class TwirpError implements Error {
+    public name = 'TwirpError';
+
+    constructor(public code:string,public message: string,public meta:{[key:string]:string}) {
+        if (typeof console !== 'undefined') {
+            console.log(`name: ${this.name}, message: ${this.message}`)
+        }
+    }
+    toString() {
+        return `${this.name} ${this.message}`;
+    }
 }
 
-const getTwirpError = (err: AxiosError): TwirpError => {
+const getTwirpError = (err: AxiosError): { message: string; code: string; meta: {},name:string} => {
     const resp = err.response;
     let twirpError = {
         code: 'unknown',
-        msg: 'unknown error',
-        meta: {}
+        message: 'unknown error',
+        meta: {},
+        name:''
     };
 
     if (resp) {
@@ -28,8 +36,9 @@ const getTwirpError = (err: AxiosError): TwirpError => {
 
             try {
                 twirpError = JSON.parse(s);
+                throw new TwirpError(twirpError.code,twirpError.message,twirpError.meta)
             } catch (e) {
-                twirpError.msg = `JSON.parse() error: ${e.toString()}`
+                twirpError.message = `JSON.parse() error: ${e.toString()}`
             }
         }
     }
@@ -55,7 +64,7 @@ export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any)
 
         })
         .catch((err: AxiosError) => {
-            callback(err, null);
+            callback(getTwirpError(err), null);
         });
     };
 };
