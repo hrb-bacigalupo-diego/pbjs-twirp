@@ -11,7 +11,7 @@ var TwirpError = /** @class */ (function () {
         }
     }
     TwirpError.prototype.toString = function () {
-        return this.name + " " + this.message;
+        return this.name + " " + this.message + " " + this.code + " " + this.meta;
     };
     return TwirpError;
 }());

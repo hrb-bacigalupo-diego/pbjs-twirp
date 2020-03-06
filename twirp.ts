@@ -10,7 +10,7 @@ class TwirpError implements Error {
         }
     }
     toString() {
-        return `${this.name} ${this.message}`;
+        return `${this.name} ${this.message} ${this.code} ${this.meta}`;
     }
 }
 
