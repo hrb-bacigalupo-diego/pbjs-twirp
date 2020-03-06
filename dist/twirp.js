@@ -31,13 +31,8 @@ var getTwirpError = function (err) {
             if (s === "[object ArrayBuffer]") {
                 s = new TextDecoder("utf-8").decode(new Uint8Array(data));
             }
-            try {
-                twirpError = JSON.parse(s);
-                throw new TwirpError(twirpError.code, twirpError.message, twirpError.meta);
-            }
-            catch (e) {
-                twirpError.message = "JSON.parse() error: " + e.toString();
-            }
+            twirpError = JSON.parse(s);
+            throw new TwirpError(twirpError.code, twirpError.message, twirpError.meta);
         }
     }
     return twirpError;

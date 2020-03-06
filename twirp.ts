@@ -34,12 +34,8 @@ const getTwirpError = (err: AxiosError): { message: string; code: string; meta: 
                 s = new TextDecoder("utf-8").decode(new Uint8Array(data));
             }
 
-            try {
-                twirpError = JSON.parse(s);
-                throw new TwirpError(twirpError.code,twirpError.message,twirpError.meta)
-            } catch (e) {
-                twirpError.message = `JSON.parse() error: ${e.toString()}`
-            }
+            twirpError = JSON.parse(s);
+            throw new TwirpError(twirpError.code,twirpError.message,twirpError.meta)
         }
     }
 
